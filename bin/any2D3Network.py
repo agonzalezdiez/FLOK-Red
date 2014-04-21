@@ -39,11 +39,16 @@ class any2D3Network:
                 if mt != "":
                     print "mt"
                     print tweet
+                    if not mt in nodes_aux.keys():
+                        nodes.append({"author":mt,"bio":"","datetime":tweet['datetime']})
+                        id = len(nodes_aux.keys())
+                        nodes_aux[mt] = id
+
                     link_str = "%s&&##&&%s" % (author,mt)
                     if not link_str in links_aux:
                         id = len(links_aux.keys())
                         links_aux[link_str] = id
-                        links.append({"source":author,"target":mt,"weight":1,"type":"mt"})
+                        links.append({"source":nodes_aux[author],"target":nodes_aux[mt],"weight":1,"type":"mt"})
 
                     else:
                         links[links_aux[link_str]]['weight'] += 1
