@@ -8,7 +8,14 @@
     </head>
     <body>
 
+    <div id="graphContainer"></div>
+    <div id="menuContainer">
+        <span id="addNode">Agnadir nodo</span>
+    </div>
+
+
         <script>
+
             var width = 1260,
                 height = 1000;
 
@@ -20,12 +27,12 @@
                                 .linkDistance(30)
                                 .size([width, height]);
 
-                var svg = d3.select("body").append("svg")
+                var svg = d3.select("#graphContainer").append("svg")
                               .attr("width", width)
                               .attr("height", height);
 
                 d3.json("data/pruebaRedD3.json", function(error, graph) {
-                    force
+                    /*force
                         .nodes(graph.nodes)
                         .links(graph.links)
                         .start();
@@ -44,10 +51,10 @@
                         .style("fill", function(d) { return color(d.group); })
                         .call(force.drag);
 
-                        node.append("title")
+                    node.append("title")
                         .text(function(d) { return d.name; });
 
-                        force.on("tick", function() {
+                    force.on("tick", function() {
                           link.attr("x1", function(d) { console.log(d);return d.source.x; })
                               .attr("y1", function(d) { return d.source.y; })
                               .attr("x2", function(d) { return d.target.x; })
@@ -55,9 +62,80 @@
 
                           node.attr("cx", function(d) { return d.x; })
                               .attr("cy", function(d) { return d.y; })
-                                                                                                                                                              .attr("cy", function(d) { return d.y; });
-                                                                                                                                                                });
-                        });
+                    });*/
+
+                    drawNetwork(graph);
+                    //Leer fuente de datos realtime
+                    nodesRealtime = [];
+                    linksRealtime = [];
+
+                });
+
+        function drawNetwork(graph){
+            
+            console.log("DRAAAAWWWWW");
+            console.log(graph.nodes);
+            self.graph = graph;
+            force
+                .nodes(self.graph.nodes)
+                .links(self.graph.links)
+                .start();
+
+            var link = svg.selectAll(".link")
+                .data(graph.links)
+                
+            var new_link = link.enter().append("line")
+                .attr("class", "link")
+                .style("stroke-width", function(d) { return Math.sqrt(d.weight); });
+
+            var node = svg.selectAll(".node")
+                .data(graph.nodes)
+                
+            //node.transition().duration(self.transTime)
+            //    .attr("cx", function(d) { return d.x; })
+            //    .attr("cy", function(d) { return d.y; });
+
+            var new_node = node.enter().append("circle")
+                .attr("class", "node")
+                .attr("r", 5)
+                .style("fill", function(d){ 
+                    if(d.author=="AUTHORRRRR!!!!"){return "red";}
+                    return color(d.group); 
+                })
+                .call(force.drag);
+
+            new_node.append("title")
+                .text(function(d) { return d.name; });
+            
+            /*console.log(force);
+            force.on("stop",function(){
+                    console.log("STOPP!!");
+                    aux = {"weight":20,"bio": "BIOOOOO","datetime": "20131212081344","author": "AUTHORRRRR!!!!"};
+                    //nodesRealTime.push(aux);
+                    graph.nodes.push(aux);
+                    drawNetwork(graph);
+            });*/
+
+            force.on("tick", function() {
+                  link.attr("x1", function(d) { return d.source.x; })
+                      .attr("y1", function(d) { return d.source.y; })
+                      .attr("x2", function(d) { return d.target.x; })
+                      .attr("y2", function(d) { return d.target.y; });
+
+                  node.attr("cx", function(d) { return d.x; })
+                      .attr("cy", function(d) { return d.y; });
+            });
+
+
+        };
+
+
+        $("#addNode").on("click",function(d){
+                aux = {"weight":20,"bio": "BIOOOOO","datetime": "20131212081344","author": "AUTHORRRRR!!!!"};
+                //nodesRealTime.push(aux);
+                self.graph.nodes.push(aux);
+                drawNetwork(self.graph);
+        });
         </script>
     </body>
 </html>
