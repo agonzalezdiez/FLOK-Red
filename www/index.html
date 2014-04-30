@@ -15,11 +15,16 @@
 
 
         <script>
+        self = {};
+
+        self.nodesAux = {};
 
             var width = 1260,
                 height = 1000;
 
                 var color = d3.scale.category20();
+                var radiusScale = d3.scale.linear()
+                                      .domain([0,100]).range([3,20]).clamp(true);
 
 
                 var force = d3.layout.force()
@@ -32,37 +37,9 @@
                               .attr("height", height);
 
                 d3.json("data/pruebaRedD3.json", function(error, graph) {
-                    /*force
-                        .nodes(graph.nodes)
-                        .links(graph.links)
-                        .start();
-
-                    var link = svg.selectAll(".link")
-                        .data(graph.links)
-                        .enter().append("line")
-                        .attr("class", "link")
-                        .style("stroke-width", function(d) { return Math.sqrt(d.weight); });
-
-                    var node = svg.selectAll(".node")
-                        .data(graph.nodes)
-                        .enter().append("circle")
-                        .attr("class", "node")
-                        .attr("r", 5)
-                        .style("fill", function(d) { return color(d.group); })
-                        .call(force.drag);
-
-                    node.append("title")
-                        .text(function(d) { return d.name; });
-
-                    force.on("tick", function() {
-                          link.attr("x1", function(d) { console.log(d);return d.source.x; })
-                              .attr("y1", function(d) { return d.source.y; })
-                              .attr("x2", function(d) { return d.target.x; })
-                              .attr("y2", function(d) { return d.target.y; });
-
-                          node.attr("cx", function(d) { return d.x; })
-                              .attr("cy", function(d) { return d.y; })
-                    });*/
+                    $.each(graph.nodes,function(i,d){
+                        self.nodesAux[d.author]=Object.keys(self.nodesAux).length;
+                    });
 
                     drawNetwork(graph);
                     //Leer fuente de datos realtime
@@ -97,7 +74,8 @@
 
             var new_node = node.enter().append("circle")
                 .attr("class", "node")
-                .attr("r", 5)
+                .attr("r", function(d){
+                               return radiusScale(d.weight);})
                 .style("fill", function(d){ 
                     if(d.author=="AUTHORRRRR!!!!"){return "red";}
                     return color(d.group); 
@@ -122,7 +100,13 @@
                       .attr("x2", function(d) { return d.target.x; })
                       .attr("y2", function(d) { return d.target.y; });
 
-                  node.attr("cx", function(d) { return d.x; })
+
+                  node.attr("r", function(d){
+                                     /*if(d.author=="AUTHORRRRR!!!!"){
+                                         console.log(d);
+                                     }*/
+                                     return radiusScale(d.weight);})
+                      .attr("cx", function(d) { return d.x; })
                       .attr("cy", function(d) { return d.y; });
             });
 
@@ -131,9 +115,30 @@
 
 
         $("#addNode").on("click",function(d){
-                aux = {"weight":20,"bio": "BIOOOOO","datetime": "20131212081344","author": "AUTHORRRRR!!!!"};
+                aux = {"bio": "BIOOOOO","datetime": "20131212081344","author": "AUTHORRRRR!!!!"};
+                aux_link = {"source":aux,"target":self.graph.nodes[Math.floor((Math.random()*self.graph.nodes.length))],"weight":1};
                 //nodesRealTime.push(aux);
-                self.graph.nodes.push(aux);
+                if(aux.author in self.nodesAux){
+                    //self.graph.nodes[self.nodesAux[aux.author]]['weight'] += 1;
+                    console.log("REPETIDO");
+                    console.log(aux.author);
+                    console.log(self.nodesAux[aux.author]);
+                    console.log(self.graph.nodes[self.nodesAux[aux.author]]);
+                    console.log(self.nodesAux);
+                    realAux = self.graph.nodes[self.nodesAux[aux.author]];
+
+                    aux_link = {"source":realAux,"target":self.graph.nodes[Math.floor((Math.random()*self.graph.nodes.length))],"weight":1};
+                }
+                else{
+                    aux_link = {"source":aux,"target":self.graph.nodes[Math.floor((Math.random()*self.graph.nodes.length))],"weight":1};
+                    console.log("AÑADO");
+                    console.log(Object.keys(self.nodesAux).length);
+                    self.nodesAux[aux.author] = Object.keys(self.nodesAux).length;
+                    self.graph.nodes.push(aux);
+                }
+
+                self.graph.links.push(aux_link);
+
                 drawNetwork(self.graph);
         });
         </script>
